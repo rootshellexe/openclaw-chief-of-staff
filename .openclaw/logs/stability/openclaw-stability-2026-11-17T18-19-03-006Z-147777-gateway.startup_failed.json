@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-17T18:19:03.006Z",
+  "reason": "gateway.startup_failed",
+  "process": {
+    "pid": 147777,
+    "platform": "linux",
+    "arch": "x64",
+    "node": "24.22.2",
+    "uptimeMs": 8966,
+    "openclawVersion": "2026.11.4",
+    "buildId": "2026.11.4-04572cc4f2ff-2026-11-17T10-42-33.586Z",
+    "commit": "04572cc"
+  },
+  "host": {
+    "hostname": "<redacted-hostname>"
+  },
+  "error": {
+    "name": "Error",
+    "message": "Startup failed: required secrets are unavailable. SecretProviderResolutionError: Secret provider \"ceo-memory\" is not configured (ref: exec:ceo-memory:ceo-memory).",
+    "stack": "Error: Startup failed: required secrets are unavailable. SecretProviderResolutionError: Secret provider \"ceo-memory\" is not configured (ref: exec:ceo-memory:ceo-memory).\n    at handleSecretsActivationError (file:///workspaces/openclaw/dist/server-startup-config-tvFzkZTo.mjs:7:5473)\n    at file:///workspaces/openclaw/dist/server-startup-config-tvFzkZTo.mjs:7:7646"
+  },
+  "snapshot": {
+    "generatedAt": "2026-11-17T18:19:03.006Z",
+    "capacity": 1000,
+    "count": 0,
+    "dropped": 0,
+    "events": [],
+    "summary": {
+      "byType": {}
+    }
+  }
+}

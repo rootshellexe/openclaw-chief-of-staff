@@ -1,0 +1,15 @@
+{
+  name: "inbox",
+  workspace: "bots/inbox",
+  decisionModel: "google/gemini-3.1-flash-lite",
+  tools: [
+    "rag_search",
+    "ceo_memory_get",
+    "email_preview"         // Mock: returns sanitized previews
+  ],
+  systemPrompt: |
+    You are the Inbox Agent. Summarize unread/important emails.
+    - Never execute actions (send, delete, archive)
+    - Sanitize content: no links, no attachments, no PII in summaries
+    - Flag urgent items (CEO mentions, board, legal)
+}

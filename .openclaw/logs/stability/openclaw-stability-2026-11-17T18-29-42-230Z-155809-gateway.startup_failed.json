@@ -1,0 +1,519 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-17T18:29:42.230Z",
+  "reason": "gateway.startup_failed",
+  "process": {
+    "pid": 155809,
+    "platform": "linux",
+    "arch": "x64",
+    "node": "24.22.2",
+    "uptimeMs": 13393,
+    "openclawVersion": "2026.11.4",
+    "buildId": "2026.11.4-04572cc4f2ff-2026-11-17T10-42-33.586Z",
+    "commit": "04572cc"
+  },
+  "host": {
+    "hostname": "<redacted-hostname>"
+  },
+  "error": {
+    "name": "WorkerTaskError",
+    "code": "failed",
+    "message": "No safe OpenClaw temp root is available. Default root: Error: Temp workspace ancestor \"/workspaces/openclaw-chief-of-staff\" is group/world writable without sticky protection; have its owner run chmod +t '/workspaces/openclaw-chief-of-staff' for a shared temp directory or chmod go-w '/workspaces/openclaw-chief-of-staff' for a private ancestor. State fallback \"/workspaces/openclaw-chief-of-staff/.openclaw\": Error: Temp workspace ancestor \"/workspaces/openclaw-chief-of-staff\" is group/world writabl...",
+    "stack": "WorkerTaskError: No safe OpenClaw temp root is available. Default root: Error: Temp workspace ancestor \"/workspaces/openclaw-chief-of-staff\" is group/world writable without sticky protection; have its owner run chmod +t '/workspaces/openclaw-chief-of-staff' for a shared temp directory or chmod go-w '/workspaces/openclaw-chief-of-staff' for a private ancestor. State fallback \"/workspaces/openclaw-chief-of-staff/.openclaw\": Error: Temp workspace ancestor \"/workspaces/openclaw-chief-of-staff\" is group/world writable without sticky protection; have its owner run chmod +t '/workspaces/openclaw-chief-of-staff' for a shared temp directory or chmod go-w '/workspaces/openclaw-chief-of-staff' for a private ancestor.\n    at WorkerTaskPoolCore.receive (file:///workspaces/openclaw/dist/src-DLGQsPRj.mjs:25:9538)\n    at Object.onMessage (file:///workspaces/openclaw/dist/src-DLGQsPRj.mjs:25:8762)\n    at file:///workspaces/openclaw/dist/src-DLGQsPRj.mjs:23:1953\n    at AsyncResource.runInAsyncScope (node:async_hooks:227:14)\n    at Object.runInContext (file:///workspaces/openclaw/dist/src-DLGQsPRj.mjs:9:98)\n    at Worker.<anonymous> (file:///workspaces/openclaw/dist/src-DLGQsPRj.mjs:23:1934)\n    at Worker.emit (node:events:514:28)\n    at e.emit (file:///workspaces/openclaw/dist/worker-cpu-DEI4ioUR.mjs:5:6193)\n    at MessagePort.<anonymous> (node:internal/worker:350:14)\n    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:869:20)"
+  },
+  "snapshot": {
+    "generatedAt": "2026-11-17T18:29:42.230Z",
+    "capacity": 1000,
+    "count": 60,
+    "dropped": 0,
+    "firstSeq": 50,
+    "lastSeq": 113,
+    "events": [
+      {
+        "seq": 50,
+        "ts": 1794940177145,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.lifecycle",
+        "durationMs": 42.4,
+        "cpuCoreRatio": 1.026
+      },
+      {
+        "seq": 51,
+        "ts": 1794940177183,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.post-early-imports",
+        "durationMs": 33.8,
+        "cpuCoreRatio": 1.293
+      },
+      {
+        "seq": 52,
+        "ts": 1794940177187,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.subscriptions",
+        "durationMs": 3.9,
+        "cpuCoreRatio": 1.205
+      },
+      {
+        "seq": 53,
+        "ts": 1794940177188,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.services",
+        "durationMs": 0.9,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 54,
+        "ts": 1794940177243,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.handlers",
+        "durationMs": 49.4,
+        "cpuCoreRatio": 1.162
+      },
+      {
+        "seq": 55,
+        "ts": 1794940177348,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.core-runtime",
+        "durationMs": 199.7,
+        "cpuCoreRatio": 1.505
+      },
+      {
+        "seq": 56,
+        "ts": 1794940177369,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.chat-metadata-lifecycle",
+        "durationMs": 20.5,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 57,
+        "ts": 1794940177395,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.config-revision-key",
+        "durationMs": 42.9,
+        "cpuCoreRatio": 1.24
+      },
+      {
+        "seq": 58,
+        "ts": 1794940177403,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.request-context",
+        "durationMs": 8.5,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 59,
+        "ts": 1794940177436,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.instance-runtime-import",
+        "durationMs": 26.5,
+        "cpuCoreRatio": 1.351
+      },
+      {
+        "seq": 60,
+        "ts": 1794940177438,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.request-runtime",
+        "durationMs": 89.5,
+        "cpuCoreRatio": 1.221
+      },
+      {
+        "seq": 61,
+        "ts": 1794940177449,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.ws-imports",
+        "durationMs": 7.1,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 63,
+        "ts": 1794940177449,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.ws-attach",
+        "durationMs": 0.4,
+        "cpuCoreRatio": 0.5
+      },
+      {
+        "seq": 64,
+        "ts": 1794940177453,
+        "type": "diagnostic.phase.completed",
+        "phase": "http.listen",
+        "durationMs": 3.6,
+        "cpuCoreRatio": 1.056
+      },
+      {
+        "seq": 65,
+        "ts": 1794940177460,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early.discovery.machine-name",
+        "durationMs": 1.4,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 66,
+        "ts": 1794940177463,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early.discovery.start",
+        "durationMs": 3,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 67,
+        "ts": 1794940177463,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early.discovery",
+        "durationMs": 4.6,
+        "cpuCoreRatio": 1.022
+      },
+      {
+        "seq": 68,
+        "ts": 1794940177466,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early.lazy-runtime-imports",
+        "durationMs": 2.7,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 69,
+        "ts": 1794940177473,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early.skills-listener",
+        "durationMs": 5.3,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 70,
+        "ts": 1794940177473,
+        "type": "diagnostic.phase.completed",
+        "phase": "runtime.early",
+        "durationMs": 19.2,
+        "cpuCoreRatio": 1.005
+      },
+      {
+        "seq": 71,
+        "ts": 1794940178303,
+        "type": "diagnostic.phase.completed",
+        "phase": "sessions.projection",
+        "durationMs": 899.4,
+        "cpuCoreRatio": 1.643
+      },
+      {
+        "seq": 72,
+        "ts": 1794940178337,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.owner-profile",
+        "durationMs": 34.2,
+        "cpuCoreRatio": 0.477
+      },
+      {
+        "seq": 73,
+        "ts": 1794940178338,
+        "type": "diagnostic.phase.completed",
+        "phase": "sessions.materialize",
+        "durationMs": 0.1,
+        "cpuCoreRatio": 0.1
+      },
+      {
+        "seq": 74,
+        "ts": 1794940178365,
+        "type": "diagnostic.phase.completed",
+        "phase": "sessions.first-page",
+        "durationMs": 13.3,
+        "cpuCoreRatio": 1.023
+      },
+      {
+        "seq": 75,
+        "ts": 1794940178384,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.lifetime-sidecars",
+        "durationMs": 45.2,
+        "cpuCoreRatio": 1.022
+      },
+      {
+        "seq": 76,
+        "ts": 1794940178392,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.active-work-import",
+        "durationMs": 7.8,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 77,
+        "ts": 1794940178405,
+        "type": "diagnostic.phase.completed",
+        "phase": "post-attach.system-ca",
+        "durationMs": 0.1,
+        "cpuCoreRatio": 0.1
+      },
+      {
+        "seq": 79,
+        "ts": 1794940178410,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.control-ui-assets",
+        "durationMs": 0.2,
+        "cpuCoreRatio": 0.2
+      },
+      {
+        "seq": 80,
+        "ts": 1794940180253,
+        "type": "diagnostic.phase.completed",
+        "phase": "plugins.runtime-post-bind",
+        "durationMs": 1842,
+        "cpuCoreRatio": 1.008
+      },
+      {
+        "seq": 81,
+        "ts": 1794940180266,
+        "type": "diagnostic.phase.completed",
+        "phase": "plugins.runtime-attach",
+        "durationMs": 11.5,
+        "cpuCoreRatio": 1.339
+      },
+      {
+        "seq": 82,
+        "ts": 1794940180297,
+        "type": "diagnostic.phase.completed",
+        "phase": "post-attach.log",
+        "durationMs": 30.2,
+        "cpuCoreRatio": 1.715
+      },
+      {
+        "seq": 83,
+        "ts": 1794940180307,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.worker-environments.github-ready",
+        "durationMs": 0,
+        "cpuCoreRatio": 0
+      },
+      {
+        "seq": 84,
+        "ts": 1794940180409,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.worker-environments.workspaces",
+        "durationMs": 101.9,
+        "cpuCoreRatio": 1.836
+      },
+      {
+        "seq": 85,
+        "ts": 1794940180413,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.worker-environments",
+        "durationMs": 114.5,
+        "cpuCoreRatio": 1.781
+      },
+      {
+        "seq": 86,
+        "ts": 1794940180449,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.connection-runtime",
+        "durationMs": 32.5,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 87,
+        "ts": 1794940180449,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.internal-hooks",
+        "durationMs": 34.6,
+        "cpuCoreRatio": 1.003
+      },
+      {
+        "seq": 88,
+        "ts": 1794940180457,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.model-auth",
+        "durationMs": 18.9,
+        "cpuCoreRatio": 1.085
+      },
+      {
+        "seq": 90,
+        "ts": 1794940180554,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.worker-environments.active",
+        "durationMs": 143.3,
+        "cpuCoreRatio": 1.509
+      },
+      {
+        "seq": 91,
+        "ts": 1794940180713,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.worker-environments.publications",
+        "durationMs": 140.8,
+        "cpuCoreRatio": 2.058
+      },
+      {
+        "seq": 92,
+        "ts": 1794940180777,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.model-runtime",
+        "durationMs": 361.7,
+        "cpuCoreRatio": 1.811
+      },
+      {
+        "seq": 93,
+        "ts": 1794940180801,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.chat-metadata",
+        "durationMs": 22.8,
+        "cpuCoreRatio": 1.425
+      },
+      {
+        "seq": 94,
+        "ts": 1794940180808,
+        "type": "diagnostic.phase.completed",
+        "phase": "channels.telegram.list-accounts",
+        "durationMs": 1.8,
+        "cpuCoreRatio": 2.111
+      },
+      {
+        "seq": 95,
+        "ts": 1794940180813,
+        "type": "diagnostic.phase.completed",
+        "phase": "channels.telegram.is-configured",
+        "durationMs": 0.2,
+        "cpuCoreRatio": 0.2
+      },
+      {
+        "seq": 96,
+        "ts": 1794940180821,
+        "type": "diagnostic.phase.completed",
+        "phase": "channels.telegram.start",
+        "durationMs": 15.5,
+        "cpuCoreRatio": 1.626
+      },
+      {
+        "seq": 97,
+        "ts": 1794940180821,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.channel-start",
+        "durationMs": 15.7,
+        "cpuCoreRatio": 1.618
+      },
+      {
+        "seq": 98,
+        "ts": 1794940180821,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.channels",
+        "durationMs": 15.9,
+        "cpuCoreRatio": 1.642
+      },
+      {
+        "seq": 99,
+        "ts": 1794940180829,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.acpx.acpx-runtime",
+        "durationMs": 1.5,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 100,
+        "ts": 1794940180838,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.browser.browser-control",
+        "durationMs": 8.2,
+        "cpuCoreRatio": 0.988
+      },
+      {
+        "seq": 102,
+        "ts": 1794940180966,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.deep-research.deep-research-jobs",
+        "durationMs": 127.3,
+        "cpuCoreRatio": 1.299
+      },
+      {
+        "seq": 103,
+        "ts": 1794940180973,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.device-pair.device-pair-notifier",
+        "durationMs": 7.2,
+        "cpuCoreRatio": 1
+      },
+      {
+        "seq": 104,
+        "ts": 1794940180974,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.file-transfer.file-transfer-workspaces",
+        "durationMs": 0.5,
+        "cpuCoreRatio": 0.5
+      },
+      {
+        "seq": 105,
+        "ts": 1794940180975,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.google.decisions~003Agoogle",
+        "durationMs": 0.2,
+        "cpuCoreRatio": 0.2
+      },
+      {
+        "seq": 106,
+        "ts": 1794940180976,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.memory-core.memory-core-index",
+        "durationMs": 0.4,
+        "cpuCoreRatio": 0.4
+      },
+      {
+        "seq": 107,
+        "ts": 1794940181082,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.memory-core.memory-core-dreaming",
+        "durationMs": 105.3,
+        "cpuCoreRatio": 1.098
+      },
+      {
+        "seq": 108,
+        "ts": 1794940181104,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.memory-core.memory-core-standing-intents",
+        "durationMs": 21.8,
+        "cpuCoreRatio": 1.106
+      },
+      {
+        "seq": 109,
+        "ts": 1794940181105,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.openai.decisions~003Aopenai",
+        "durationMs": 0.1,
+        "cpuCoreRatio": 0.1
+      },
+      {
+        "seq": 110,
+        "ts": 1794940181105,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services.skill-workshop.skill-workshop-maintenance",
+        "durationMs": 0.2,
+        "cpuCoreRatio": 0.2
+      },
+      {
+        "seq": 111,
+        "ts": 1794940181106,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.plugin-services",
+        "durationMs": 302.9,
+        "cpuCoreRatio": 1.205
+      },
+      {
+        "seq": 112,
+        "ts": 1794940181107,
+        "type": "diagnostic.phase.completed",
+        "phase": "sidecars.total",
+        "durationMs": 693.6,
+        "cpuCoreRatio": 1.527
+      },
+      {
+        "seq": 113,
+        "ts": 1794940181108,
+        "type": "diagnostic.phase.completed",
+        "phase": "gateway.ready",
+        "durationMs": 2715.1,
+        "cpuCoreRatio": 1.184
+      }
+    ],
+    "summary": {
+      "byType": {
+        "diagnostic.phase.completed": 60
+      }
+    }
+  }
+}

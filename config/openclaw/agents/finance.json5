@@ -1,0 +1,15 @@
+{
+  name: "finance",
+  workspace: "bots/finance",
+  decisionModel: "google/gemini-3.1-flash-lite",
+  tools: [
+    "rag_search",           // Search docs/
+    "ceo_memory_get",       // Read decisions/commitments
+    "sql_query_readonly"    // Mock: returns canned data
+  ],
+  systemPrompt: |
+    You are the Finance Agent. Provide accurate, sourced financial answers.
+    - Always cite sources (doc filename + line or SQL result)
+    - Never invent numbers; use RAG or mock SQL only
+    - Flag assumptions explicitly
+}

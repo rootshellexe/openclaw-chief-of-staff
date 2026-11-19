@@ -1,0 +1,56 @@
+{
+  gateway: {
+    // SECURITY: Never bind publicly - reverse proxy handles TLS + exposure
+    bind: "loopback",
+    port: 18789,
+    mode: "local",
+    
+    // Auth: Token-based for all programmatic access
+    auth: {
+      mode: "token",
+      // Token set via OPENCLAW_GATEWAY_TOKEN env var (host-only)
+    },
+    
+    // Public origin for Control UI (reverse proxy URL)
+    // Set via env in production; localhost for POC
+    publicOrigin: "http://localhost:18789",
+    
+    // Control UI origin allowlist (must match publicOrigin)
+    controlUi: {
+      enabled: true,
+      allowedOrigins: [
+        "http://localhost:18789"
+        // Production: add Cloudflare/Tailscale URL
+      ],
+      experimental: {
+        templates: true  // For briefing templates
+      }
+    },
+    
+    // Reverse proxy trust (configure per proxy)
+    // Cloudflare: use their IP ranges
+    // Tailscale: 100.x.y.z/32
+    // Nginx: proxy host IP
+    trustedProxies: [],  // Set per deployment
+    allowRealIpFallback: false,
+    
+    // Webhook endpoint for Telegram
+    http: {
+      endpoints: {
+        webhooks: { enabled: true }
+      }
+    },
+    models: {
+      providers: {
+        google: {
+          baseUrl: "https://generativelanguage.googleapis.com/v1beta",
+          apiKey: "env:GOOGLE_API_KEY",
+          api: "google-gemini",
+          models: [
+            { id: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite" }
+          ]
+        }
+      }
+    }
+  }
+}

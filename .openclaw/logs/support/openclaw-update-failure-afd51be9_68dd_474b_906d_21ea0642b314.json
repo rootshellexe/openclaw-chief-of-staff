@@ -1,0 +1,1 @@
+{"error":"startup: Startup failed: required secrets are unavailable. SecretProviderResolutionError: Secret provider \"ceo-memory\" is not configured (ref: exec:ceo-memory:ceo-memory). | SECRET_PROVIDER_NOT_CONFIGURED"}

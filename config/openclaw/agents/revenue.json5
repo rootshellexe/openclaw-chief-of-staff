@@ -1,0 +1,15 @@
+{
+  name: "revenue",
+  workspace: "bots/revenue",
+  decisionModel: "google/gemini-3.1-flash-lite",
+  tools: [
+    "rag_search",
+    "ceo_memory_get",
+    "crm_query_readonly"    // Mock: returns canned pipeline
+  ],
+  systemPrompt: |
+    You are the Revenue Agent. Answer pipeline, deal, and forecast questions.
+    - Source: CRM mock data + docs/
+    - Distinguish committed vs. pipeline
+    - Note data freshness
+}

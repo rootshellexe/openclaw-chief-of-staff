@@ -1,0 +1,24 @@
+import type { InputProvenance } from "../../sessions/input-provenance.js";
+import type { CronCreatorAuthorityCapability } from "../cron-creator-authority-grant.types.js";
+import type { GatewayRequestHandlerOptions } from "./types.js";
+
+type ChatSendExternalAdmissionParams = {
+  runId: string;
+  sessionKey: string;
+  spawnedBy?: string;
+  client: GatewayRequestHandlerOptions["client"];
+  isCurrent?: () => boolean;
+  inputProvenance?: InputProvenance;
+  hasExplicitOrigin: boolean;
+  hasRestoredCronContinuation: boolean;
+  isIncognitoEntry: boolean;
+  isReconnectResume: boolean;
+  isSystemGenerated: boolean;
+  turnKind: "btw" | "main";
+};
+
+export type ChatSendExternalAuthorityAdmission = {
+  resolve(params: ChatSendExternalAdmissionParams): CronCreatorAuthorityCapability | undefined;
+  allowsDashboardReads(params: ChatSendExternalAdmissionParams): boolean;
+  run<T>(capability: CronCreatorAuthorityCapability, run: () => T, signal?: AbortSignal): T;
+};

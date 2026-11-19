@@ -1,0 +1,19 @@
+{
+  id: "daily-brief",
+  name: "Daily Briefing",
+  version: "1.0.0",
+  description: "Generates 07:00 briefing from mock data",
+  permissions: { 
+    state: "read",
+    tools: ["ceo_memory_get", "rag_search", "mock_brief_data"]
+  },
+  cron: {
+    briefing: "0 7 * * *"  // 07:00 daily
+  },
+  tools: {
+    generate_briefing: {
+      description: "Generate daily briefing markdown",
+      params: { date?: string }
+    }
+  }
+}

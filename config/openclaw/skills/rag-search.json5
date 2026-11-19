@@ -1,0 +1,17 @@
+{
+  id: "rag-search",
+  name: "RAG Search",
+  version: "1.0.0",
+  description: "Keyword search over docs/ corpus",
+  permissions: { fs: ["docs/"] },
+  tools: {
+    search_docs: {
+      description: "Search documentation for relevant snippets",
+      params: { 
+        query: string,
+        limit?: number,
+        threshold?: number  // min score 0-1
+      }
+    }
+  }
+}

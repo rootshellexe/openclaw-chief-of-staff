@@ -1,0 +1,40 @@
+{
+  id: "ceo-memory",
+  name: "CEO Memory",
+  version: "1.0.0",
+  description: "Persistent decisions, commitments, and context",
+  permissions: {
+    state: "read-write",
+    fs: ["bots/ceo-memory/"]
+  },
+  tools: {
+    get_decisions: {
+      description: "Get all logged decisions",
+      params: { limit?: number }
+    },
+    log_decision: {
+      description: "Record a CEO decision",
+      params: { topic: string, decision: string, rationale: string, status: "pending"|"approved"|"rejected" }
+    },
+    get_commitments: {
+      description: "Get open commitments",
+      params: { status?: "open"|"done"|"overdue" }
+    },
+    add_commitment: {
+      description: "Add a commitment to track",
+      params: { what: string, owner: string, due: string, context?: string }
+    },
+    update_commitment: {
+      description: "Update commitment status",
+      params: { id: string, status: "open"|"done"|"overdue", note?: string }
+    },
+    get_context: {
+      description: "Get people/context notes",
+      params: { query?: string }
+    },
+    upsert_context: {
+      description: "Add/update person or context note",
+      params: { key: string, value: string }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+$include "base_channel.json5"
+
+provider: telegram
+botToken: ""  // Set via OPENCLAW_TELEGRAM_BOT_TOKEN env
+webhookPath: "/webhook/telegram"
+
+// CEO-only allowlist (username or user ID)
+allowlist:
+  - "ceo_username"  // Replace with actual
+
+// Commands the CEO can use
+commands:
+  - "/brief"      // Daily briefing
+  - "/status"     // Company snapshot
+  - "/decision"   // Log decision
+  - "/commit"     // Add commitment
+  - "/search"     // RAG search
+  - "/help"       // Command list

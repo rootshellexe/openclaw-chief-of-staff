@@ -1,0 +1,95 @@
+{
+  "$schema": "https://openclaw.ai/schema.json",
+  "meta": {
+    "lastTouchedVersion": "2026.11.4"
+  },
+  "models": {
+    "providers": {
+      "google": {
+        "baseUrl": "https://generativelanguage.googleapis.com/v1beta",
+        "apiKey": "env:GOOGLE_API_KEY",
+        "api": "google-generative-ai",
+        "models": [
+          { "id": "gemini-3.1-flash-lite", "name": "Gemini 3.1 Flash Lite" }
+        ]
+      }
+    }
+  },
+  "gateway": {
+    "bind": "loopback",
+    "port": 18789,
+    "mode": "local",
+    "auth": {
+      "mode": "token"
+    },
+    "publicOrigin": "http://localhost:18789",
+    "controlUi": {
+      "enabled": true,
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "https://*.app.github.dev"
+      ],
+      "experimental": {
+        "templates": true
+      }
+    },
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1",
+      "10.0.0.0/8",
+      "172.16.0.0/12",
+      "192.168.0.0/16"
+    ],
+    "allowRealIpFallback": true,
+    "http": {
+      "endpoints": {
+        "chatCompletions": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "agents": {
+    "ownership": "explicit",
+    "defaults": {
+      "model": {
+        "primary": "google/gemini-3.1-flash-lite"
+      },
+      "skills": [
+        "ceo-memory",
+        "rag-search",
+        "daily-brief"
+      ]
+    },
+    "entries": {
+      "finance": {
+        "name": "finance",
+        "workspace": "bots/finance",
+        "decisionModel": "google/gemini-3.1-flash-lite"
+      },
+      "revenue": {
+        "name": "revenue",
+        "workspace": "bots/revenue",
+        "decisionModel": "google/gemini-3.1-flash-lite"
+      },
+      "inbox": {
+        "name": "inbox",
+        "workspace": "bots/inbox",
+        "decisionModel": "google/gemini-3.1-flash-lite"
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "botToken": "",
+      "webhookPath": "/webhook/telegram",
+      "allowFrom": [
+        "ceo_username"
+      ],
+      "enabled": true
+    }
+  },
+  "skills": {
+    "entries": {}
+  }
+}

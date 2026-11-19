@@ -1,0 +1,86 @@
+import type { Command } from "commander";
+import {
+  formatCliOperatorError,
+  isExpectedCliError,
+  ReportedCliCommandError,
+} from "./failure-output.js";
+import { isJsonOutputModeActive } from "./json-output-mode.js";
+export { formatErrorMessage } from "../infra/errors.js";
+
+type ManagerLookupResult<T> = {
+  manager: T | null;
+  error?: string;
+};
+
+export async function withManager<T>(params: {
+  getManager: () => Promise<ManagerLookupResult<T>>;
+  onMissing: (error?: string) => void;
+  run: (manager: T) => Promise<void>;
+  close: (manager: T) => Promise<void>;
+  onCloseError?: (err: unknown) => void;
+}): Promise<void> {
+  const { manager, error } = await params.getManager();
+  if (!manager) {
+    params.onMissing(error);
+    return;
+  }
+  try {
+    await params.run(manager);
+  } finally {
+    try {
+      await params.close(manager);
+    } catch (err) {
+      params.onCloseError?.(err);
+    }
+  }
+}
+
+export async function runCommandWithRuntime(
+  runtime: { error: (message: string) => void; exit: (code: number) => void },
+  action: () => Promise<void>,
+  onError?: (error: unknown) => void,
+): Promise<void> {
+  try {
+    await action();
+  } catch (err) {
+    // Keep help imports lazy while completed commands reach the cleanup and output-drain owner.
+    const { ExitError } = await import("../runtime.js");
+    if (err instanceof ExitError || isExpectedCliError(err)) {
+      throw err;
+    }
+    const jsonOutput = isJsonOutputModeActive(process.argv);
+    try {
+      if (onError) {
+        onError(err);
+      } else {
+        runtime.error(formatCliOperatorError(err));
+        if (!jsonOutput) {
+          runtime.exit(1);
+        }
+      }
+    } catch (error) {
+      if (!jsonOutput || !(error instanceof ExitError)) {
+        throw error;
+      }
+    }
+    if (jsonOutput) {
+      throw new ReportedCliCommandError(err);
+    }
+  }
+}
+
+// oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- Commander option values are typed by the caller.
+export function resolveOptionFromCommand<T>(
+  command: Command | undefined,
+  key: string,
+): T | undefined {
+  let current: Command | null | undefined = command;
+  while (current) {
+    const opts = current.opts?.() ?? {};
+    if (opts[key] !== undefined) {
+      return opts[key];
+    }
+    current = current.parent;
+  }
+  return undefined;
+}

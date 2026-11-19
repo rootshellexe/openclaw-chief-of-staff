@@ -1,0 +1,416 @@
+/**
+ * Canonical conversation resolution for command and inbound channel flows.
+ * This module turns channel targets, thread ids, aliases, and plugin hooks into stable binding ids.
+ */
+import {
+  normalizeOptionalLowercaseString,
+  normalizeOptionalString,
+} from "@openclaw/normalization-core/string-coerce";
+import type { OpenClawConfig } from "../config/types.openclaw.js";
+import {
+  resolveTargetPrefixedChannel,
+  stripOutboundTargetKindPrefix,
+  stripTargetProviderPrefix,
+} from "../infra/outbound/channel-target-prefix.js";
+import { resolveConversationIdFromTargets } from "../infra/outbound/conversation-id.js";
+import { normalizeConversationTargetRef } from "../infra/outbound/session-binding-normalization.js";
+import type { SessionBindingPlacement } from "../infra/outbound/session-binding.types.js";
+import { normalizeTargetForProvider } from "../infra/outbound/target-normalization.js";
+import { stringifyRouteThreadId } from "../plugin-sdk/channel-route.js";
+import { loadOptionalBundledChannelPublicArtifact } from "./plugins/optional-public-artifact.js";
+import { getLoadedChannelPluginForRead } from "./plugins/registry-loaded.js";
+import { getChannelPlugin } from "./plugins/registry.js";
+import { resolveBaseConversationId } from "./plugins/session-conversation.js";
+import type { ChannelCommandConversationContext } from "./plugins/types.adapters.js";
+import type { ChannelMessagingAdapter } from "./plugins/types.core.js";
+import type { AnyChannelPlugin as ChannelPlugin } from "./plugins/types.plugin.js";
+import { normalizeAnyChannelId } from "./registry.js";
+
+type ThreadBindingApi = Pick<ChannelMessagingAdapter, "resolveInboundConversation"> & {
+  defaultTopLevelPlacement?: unknown;
+};
+
+function loadBundledChannelThreadBindingApi(channelId: string): ThreadBindingApi | undefined {
+  return loadOptionalBundledChannelPublicArtifact({
+    channelId,
+    artifactBasename: "thread-binding-api.js",
+  });
+}
+
+type ConversationResolution = {
+  channel: string;
+  accountId: string;
+  conversationId: string;
+  parentConversationId?: string;
+  threadId?: string;
+};
+
+/**
+ * Command-side inputs used to resolve a canonical conversation binding target.
+ */
+export type ResolveCommandConversationResolutionInput = {
+  cfg: OpenClawConfig;
+  /** Preserve the command's selected registry through all provider resolution. */
+  plugin?: ChannelPlugin;
+  channel?: string | null;
+  accountId?: string | null;
+  chatType?: string | null;
+  threadId?: string | number | null;
+  threadParentId?: string | null;
+  senderId?: string | null;
+  sessionKey?: string | null;
+  parentSessionKey?: string | null;
+  originatingTo?: string | null;
+  commandTo?: string | null;
+  fallbackTo?: string | null;
+  from?: string | null;
+  nativeChannelId?: string | null;
+};
+
+type ResolveInboundConversationResolutionInput = {
+  cfg: OpenClawConfig;
+  channel?: string | null;
+  accountId?: string | null;
+  to?: string | null;
+  threadId?: string | number | null;
+  groupId?: string | null;
+};
+
+const CANONICAL_TARGET_PREFIXES = ["user:", "spaces/"] as const;
+
+function resolveChannelId(raw?: string | null): string | null {
+  return normalizeAnyChannelId(raw) ?? normalizeOptionalLowercaseString(raw) ?? null;
+}
+
+function normalizeResolutionTarget(
+  params: { channel: string; accountId: string; threadId?: string; plugin?: ChannelPlugin },
+  conversation: { conversationId?: string; parentConversationId?: string } | null | undefined,
+): ConversationResolution | null {
+  const conversationId = normalizeOptionalString(conversation?.conversationId);
+  if (!conversationId) {
+    return null;
+  }
+  const parentConversationId = normalizeOptionalString(conversation?.parentConversationId);
+  const defaultParentToSelf =
+    params.plugin?.bindings?.selfParentConversationByDefault === true &&
+    !params.threadId &&
+    !parentConversationId;
+  const normalized = normalizeConversationTargetRef({
+    conversationId,
+    parentConversationId: defaultParentToSelf ? conversationId : parentConversationId,
+  });
+  const normalizedParentConversationId = defaultParentToSelf
+    ? normalized.conversationId
+    : normalized.parentConversationId;
+  return {
+    channel: params.channel,
+    accountId: params.accountId,
+    conversationId: normalized.conversationId,
+    ...(normalizedParentConversationId
+      ? { parentConversationId: normalizedParentConversationId }
+      : {}),
+    ...(params.threadId ? { threadId: params.threadId } : {}),
+  };
+}
+
+function resolveConversationScope(
+  channel: string,
+  plugin: ChannelPlugin | undefined,
+  params: Pick<ResolveCommandConversationResolutionInput, "accountId" | "cfg" | "threadId">,
+) {
+  const { accountId, cfg } = params;
+  return {
+    channel,
+    accountId:
+      normalizeOptionalString(accountId) ||
+      normalizeOptionalString(plugin?.config.defaultAccountId?.(cfg)) ||
+      "default",
+    threadId: stringifyRouteThreadId(params.threadId),
+    plugin,
+  };
+}
+
+function resolveFallbackConversationTargetId(params: {
+  channel: string;
+  plugin?: ChannelPlugin;
+  rawTarget: string;
+  preserveScope?: boolean;
+}): string | undefined {
+  const target = params.rawTarget;
+  const withoutKind = stripOutboundTargetKindPrefix(target);
+  const base = params.preserveScope
+    ? withoutKind
+    : resolveBaseConversationId(params.channel, withoutKind, params.plugin);
+  return resolveConversationIdFromTargets([base]) ?? (base !== target ? base : undefined);
+}
+
+function resolveChannelTargetId(params: {
+  channel: string;
+  plugin?: ChannelPlugin;
+  target?: string | null;
+  preserveExplicitTopicSuffix?: boolean;
+}): string | undefined {
+  const target = normalizeOptionalString(params.target);
+  if (!target) {
+    return undefined;
+  }
+  const messaging = params.plugin?.messaging;
+
+  const lower = target.toLowerCase();
+  const channelPrefix = `${params.channel}:`;
+  if (lower.startsWith(channelPrefix)) {
+    return resolveChannelTargetId({
+      ...params,
+      target: target.slice(channelPrefix.length),
+    });
+  }
+  if (CANONICAL_TARGET_PREFIXES.some((prefix) => lower.startsWith(prefix))) {
+    return target;
+  }
+
+  const prefixedChannel = resolveTargetPrefixedChannel(target);
+  if (!prefixedChannel || prefixedChannel !== params.channel) {
+    const explicitConversationId = resolveFallbackConversationTargetId({
+      rawTarget: target,
+      channel: params.channel,
+      plugin: params.plugin,
+      preserveScope: params.preserveExplicitTopicSuffix,
+    });
+    if (explicitConversationId) {
+      return explicitConversationId;
+    }
+  }
+
+  const normalizedTarget = normalizeOptionalString(messaging?.normalizeTarget?.(target));
+  if (normalizedTarget) {
+    const withoutProvider = stripTargetProviderPrefix(normalizedTarget, params.channel);
+    const conversationId = resolveFallbackConversationTargetId({
+      rawTarget: withoutProvider,
+      channel: params.channel,
+      plugin: params.plugin,
+      preserveScope: params.preserveExplicitTopicSuffix,
+    });
+    return conversationId || withoutProvider || normalizedTarget;
+  }
+
+  return target;
+}
+
+/**
+ * Resolves whether top-level bindings default to the current conversation or a child thread.
+ */
+export function resolveChannelDefaultBindingPlacement(
+  rawChannel?: string | null,
+): "current" | "child" | undefined {
+  const channel = resolveChannelId(rawChannel);
+  if (!channel) {
+    return undefined;
+  }
+  const pluginPlacement =
+    getLoadedChannelPluginForRead(channel)?.conversationBindings?.defaultTopLevelPlacement;
+  if (pluginPlacement != null) {
+    return pluginPlacement;
+  }
+  const value = loadBundledChannelThreadBindingApi(channel)?.defaultTopLevelPlacement;
+  const normalized = normalizeOptionalString(typeof value === "string" ? value : undefined);
+  return normalized === "current" || normalized === "child" ? normalized : undefined;
+}
+
+/**
+ * Placement for a binding created by an agent-spawned worker. Only "child" (a new thread)
+ * is admissible: "current" would hand the user's conversation to the worker.
+ */
+export function resolveSpawnThreadBindingPlacement(
+  rawChannel: string,
+  supportedPlacements: readonly SessionBindingPlacement[],
+): SessionBindingPlacement {
+  return (
+    resolveChannelDefaultBindingPlacement(rawChannel) ??
+    (supportedPlacements.includes("child") ? "child" : "current")
+  );
+}
+
+/** Explicit spawn discovery is separate from automatic command placement. */
+export function supportsThreadBindingSpawn(rawChannel: string): boolean {
+  return resolveChannelDefaultBindingPlacement(rawChannel) === "child";
+}
+
+/**
+ * Resolves command context into a canonical channel/account/conversation tuple.
+ */
+export function resolveCommandConversationResolution(
+  params: ResolveCommandConversationResolutionInput,
+): ConversationResolution | null {
+  const channel = resolveChannelId(params.channel);
+  if (!channel) {
+    return null;
+  }
+  const plugin = params.plugin ?? getLoadedChannelPluginForRead(channel);
+  const resolutionScope = resolveConversationScope(channel, plugin, params);
+  const { accountId, threadId } = resolutionScope;
+  const from = normalizeOptionalString(params.from);
+  const chatType = normalizeOptionalString(params.chatType);
+
+  const commandParams: ChannelCommandConversationContext = {
+    accountId,
+    threadId,
+    threadParentId: normalizeOptionalString(params.threadParentId),
+    senderId: normalizeOptionalString(params.senderId),
+    sessionKey: normalizeOptionalString(params.sessionKey),
+    parentSessionKey: normalizeOptionalString(params.parentSessionKey),
+    from,
+    chatType,
+    originatingTo: params.originatingTo ?? undefined,
+    commandTo: params.commandTo ?? undefined,
+    fallbackTo: params.fallbackTo ?? undefined,
+  };
+
+  const resolvedByProvider = plugin?.bindings?.resolveCommandConversation?.(commandParams);
+  const providerResolution = normalizeResolutionTarget(resolutionScope, resolvedByProvider);
+  if (providerResolution) {
+    return providerResolution;
+  }
+
+  const to =
+    normalizeOptionalString(params.originatingTo) ?? normalizeOptionalString(params.fallbackTo);
+  const nativeChannelId = normalizeOptionalString(params.nativeChannelId);
+  const focusedBinding = plugin?.threading?.resolveFocusedBinding?.({
+    cfg: params.cfg,
+    accountId,
+    context: {
+      ...(to ? { To: to } : {}),
+      ...(from ? { From: from } : {}),
+      ...(chatType ? { ChatType: chatType } : {}),
+      ...(threadId ? { MessageThreadId: threadId } : {}),
+      ...(nativeChannelId ? { NativeChannelId: nativeChannelId } : {}),
+    },
+  });
+  const focusedResolution = normalizeResolutionTarget(resolutionScope, focusedBinding);
+  if (focusedResolution) {
+    return focusedResolution;
+  }
+
+  const resolveTarget = (target?: string | null) =>
+    resolveChannelTargetId({ channel, plugin, target });
+  const baseConversationId =
+    resolveTarget(params.originatingTo) ??
+    resolveTarget(params.commandTo) ??
+    resolveTarget(params.fallbackTo);
+  const parentConversationId =
+    resolveTarget(params.threadParentId) ??
+    (threadId && baseConversationId && baseConversationId !== threadId
+      ? baseConversationId
+      : undefined);
+  const conversationId = threadId || baseConversationId;
+  if (!conversationId) {
+    return null;
+  }
+  return normalizeResolutionTarget(resolutionScope, { conversationId, parentConversationId });
+}
+
+/**
+ * Resolves inbound message context into the canonical binding conversation tuple.
+ */
+export function resolveInboundConversationResolution(
+  params: ResolveInboundConversationResolutionInput,
+): ConversationResolution | null {
+  const channel = resolveChannelId(params.channel);
+  if (!channel) {
+    return null;
+  }
+  const plugin = getLoadedChannelPluginForRead(channel);
+  const resolutionScope = resolveConversationScope(channel, plugin, params);
+  const { threadId } = resolutionScope;
+  const to = normalizeOptionalString(params.to);
+  const resolverParams = {
+    from: undefined,
+    to,
+    conversationId: normalizeOptionalString(params.groupId) ?? to,
+    threadId,
+    threadParentId: undefined,
+    isGroup: true,
+  };
+
+  const providerConversation = plugin?.messaging?.resolveInboundConversation?.(resolverParams);
+  const providerResolution = normalizeResolutionTarget(resolutionScope, providerConversation);
+  if (providerResolution || providerConversation === null) {
+    // A null provider response is an explicit rejection, not a signal to try
+    // bundled/fallback parsing for the same inbound target.
+    return providerResolution;
+  }
+
+  const artifactApi = loadBundledChannelThreadBindingApi(channel);
+  const artifactConversation =
+    typeof artifactApi?.resolveInboundConversation === "function"
+      ? artifactApi.resolveInboundConversation(resolverParams)
+      : undefined;
+  const artifactResolution = normalizeResolutionTarget(resolutionScope, artifactConversation);
+  if (artifactResolution || artifactConversation === null) {
+    // Lightweight bundled artifacts can also reject targets before full plugin loading.
+    return artifactResolution;
+  }
+
+  const resolveTarget = (target?: string | null) =>
+    resolveChannelTargetId({
+      channel,
+      plugin,
+      target,
+      preserveExplicitTopicSuffix: threadId == null,
+    });
+  const parentConversationId = resolveTarget(params.to) ?? resolveTarget(params.groupId);
+  const genericConversationId = threadId ?? resolveTarget(params.groupId) ?? parentConversationId;
+  if (!genericConversationId) {
+    return null;
+  }
+  return normalizeResolutionTarget(resolutionScope, {
+    conversationId: genericConversationId,
+    parentConversationId: threadId != null ? parentConversationId : undefined,
+  });
+}
+
+/**
+ * A route to compare. `transport` marks a route that is sent as given: its explicit
+ * threadId overrides any thread encoded in `to`, as the channel's send path does.
+ * Inbound origins leave it unset, so a thread encoded in `to` wins.
+ */
+type DeliveryRoute = { to: string; threadId?: string | number | null; transport?: boolean };
+
+/** Same conversation per the channel's own resolver; undefined when it cannot tell. */
+export function deliveryRoutesShareConversation(params: {
+  channel: string;
+  left: DeliveryRoute;
+  right: DeliveryRoute;
+}): boolean | undefined {
+  const channel = resolveChannelId(params.channel);
+  // Bundled fallback keeps matching before the channel registers (#93107).
+  const resolve = channel ? getChannelPlugin(channel)?.messaging?.resolveInboundConversation : null;
+  if (!channel || !resolve) {
+    return undefined;
+  }
+  const conversationOf = (to: string, threadId?: string | number) =>
+    resolve({ to, conversationId: to, threadId, isGroup: true });
+  const resolveRoute = (route: DeliveryRoute) => {
+    // Provider-owned normalization (handle casing, link forms) before identity.
+    const to = normalizeTargetForProvider(channel, route.to) ?? route.to.trim();
+    const threadId = route.threadId ?? undefined;
+    if (!route.transport || threadId === undefined) {
+      return conversationOf(to, threadId);
+    }
+    const base = conversationOf(to);
+    // A send whose target already encodes a thread and also carries an explicit one:
+    // which wins is send-path precedence the channel owns (Telegram keeps a Direct
+    // Messages topic but lets the explicit thread replace a forum topic). Core cannot
+    // tell, so it reports "unknown" and callers keep their conservative comparison.
+    if (base?.parentConversationId && base.conversationId !== base.parentConversationId) {
+      return undefined;
+    }
+    return conversationOf(base?.conversationId ?? to, threadId);
+  };
+  const [left, right] = [params.left, params.right].map(resolveRoute);
+  const same = (a?: string, b?: string) =>
+    normalizeOptionalString(a) === normalizeOptionalString(b);
+  return left?.conversationId && right?.conversationId
+    ? same(left.conversationId, right.conversationId) &&
+        same(left.parentConversationId, right.parentConversationId)
+    : undefined;
+}
